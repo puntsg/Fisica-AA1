@@ -19,4 +19,19 @@ public static class FK
             joints[i].position = pivot + newPseudoLunk;
         }
     }
+    public static void ApplyFK
+    (
+        List<Transform> joints,
+        CustomQuaternion rotation,
+        int joint = 0
+    )
+    {
+        Vector3 pivot = joints[joint].position;
+        for (int i = joint + 1; i < joints.Count; i++)
+        {
+            Vector3 pseudoLink = joints[i].position - pivot;
+            Vector3 newPseudoLunk = Rotator.QuaternionRot(pseudoLink,rotation);
+            joints[i].position = pivot + newPseudoLunk;
+        }
+    }
 };

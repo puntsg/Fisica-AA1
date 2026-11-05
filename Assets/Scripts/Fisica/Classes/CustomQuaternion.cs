@@ -19,6 +19,13 @@ public class CustomQuaternion
         y = p.y;
         z = p.z;
     }
+    public CustomQuaternion(float mag, Vector3 p)
+    {
+        w = mag;
+        x = p.x;
+        y = p.y;
+        z = p.z;
+    }
     public float GetQuatNorm()
     {
         return (float)Mathf.Sqrt(w * w + x * x + y * y + z * z);
