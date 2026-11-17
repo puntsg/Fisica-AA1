@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TestJoint : MonoBehaviour
@@ -5,6 +6,8 @@ public class TestJoint : MonoBehaviour
     public Transform baseJoint;
     public Transform ballJoint;
     public Transform endEffector;
+
+    public List<Transform> joints = new List<Transform>();
 
     public float targetSwingXDegrees;
     public float targetSwingYDegrees;
@@ -17,6 +20,7 @@ public class TestJoint : MonoBehaviour
     private CustomQuaternion initialJointPosition;
     private Vector3 link;
 
+    public bool rotate = true;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -30,31 +34,34 @@ public class TestJoint : MonoBehaviour
         
         link = endEffector.position - ballJoint.position;
 
-        
+        joints.Add(baseJoint);
+        joints.Add(ballJoint);
+        joints.Add(endEffector);
     }
 
     // Update is called once per frame
     void Update()
     {
-        float swingX = targetSwingXDegrees * Mathf.PI / 180f;
-        float swingY = targetSwingYDegrees * Mathf.PI / 180f;
-        float twist = targetTwistDegrees * Mathf.PI / 180f;
+        if (rotate)
+        {
+            float swingX = targetSwingXDegrees * Mathf.PI / 180f;
+            float swingY = targetSwingYDegrees * Mathf.PI / 180f;
+            float twist = targetTwistDegrees * Mathf.PI / 180f;
 
-        CustomQuaternion requestedSwing = Spring.FromSwingCoordinates(new Vector2(swingX, swingY));
+            CustomQuaternion requestedSwing = Spring.FromSwingCoordinates(new Vector2(swingX, swingY));
 
-        CustomQuaternion requestedTwist = new CustomQuaternion(twist, new Vector3(0,0,1));
+            CustomQuaternion requestedTwist = new CustomQuaternion(twist, new Vector3(0, 0, 1));
 
-        CustomQuaternion requested = CustomQuaternion.Multiply(requestedTwist, requestedSwing);
+            CustomQuaternion requested = CustomQuaternion.Multiply(requestedTwist, requestedSwing);
 
-        float coneLimit = coneAngleLimit * Mathf.PI / 180f;
-        float lowerTwist = minTwist * Mathf.PI / 180f;
-        float upperTwist = maxTwist * Mathf.PI / 180f;
+            float coneLimit = coneAngleLimit * Mathf.PI / 180f;
+            float lowerTwist = minTwist * Mathf.PI / 180f;
+            float upperTwist = maxTwist * Mathf.PI / 180f;
 
-        BallAndSocket constraint = new BallAndSocket(coneLimit, lowerTwist, upperTwist);
+            BallAndSocket constraint = new BallAndSocket(coneLimit, lowerTwist, upperTwist);
 
-        CustomQuaternion constrained = constraint.Constrain(requested);
-
-        CustomQuaternion completedRotation = CustomQuaternion.Multiply(constrained, constrained);
-
+            CustomQuaternion constrained = constraint.Constrain(requested);
+            FK.ApplyFK(joints, constrained, 1);
+        }
     }
 }
