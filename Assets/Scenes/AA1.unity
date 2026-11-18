@@ -583,18 +583,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64f6207f7f4e8314ab1e59ac63fcd32a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  armPoints:
-  - {fileID: 7486649253249147609}
-  - {fileID: 1507617328344707250}
-  - {fileID: 6005331574080305187}
-  - {fileID: 8909333997106971253}
-  speed: 1
-  armAmplitude: 0.4
-  shovelAmplitude: 0.6
-  rotationAxis: {x: 1, y: 0, z: 0}
-  previousArmRots: []
-  time: 0
-  dt: 0.02
+  mouseInput: {x: 0, y: 0}
+  mouseWheelInput: 0
+  mousePressed: 0
+  armSegments:
+  - {fileID: 4995785343625360021}
+  - {fileID: 5847353786671757949}
+  - {fileID: 6226703235184382432}
+  shovel: {fileID: 2118872397552048885}
+  jointsTransform: []
+  jointData: []
+  shovelTransform: {fileID: 0}
+  shovelJoint: {fileID: 0}
+  angles: []
+  rotationSpeed: 0.03
+  selectedArmJoint: 0
+  armRotation: 0
+  shovelRotation: 0
+  shovelSpeed: 0.1
 --- !u!1 &998526932479359857
 GameObject:
   m_ObjectHideFlags: 0
@@ -700,6 +706,7 @@ GameObject:
   - component: {fileID: 8909333997106971253}
   - component: {fileID: 5947428592199856061}
   - component: {fileID: 5083937800383788781}
+  - component: {fileID: 8909333997106971254}
   m_Layer: 0
   m_Name: Shovel
   m_TagString: Untagged
@@ -791,6 +798,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3247691482174575796}
+  - component: {fileID: 3820368557735886159}
   m_Layer: 0
   m_Name: Arm
   m_TagString: Untagged
@@ -798,6 +806,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &3820368557735886159
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3820368557735886158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 894ab4bdf6b846143b66e5e33baacd23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Axis: {x: 0, y: 0, z: 0}
+  StartOffset: {x: 0, y: 0, z: 0}
+  MinAngle: 0
+  MaxAngle: 0
 --- !u!23 &3909477630509132862
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -901,6 +925,7 @@ GameObject:
   - component: {fileID: 7486649253249147609}
   - component: {fileID: 1521745809793276512}
   - component: {fileID: 5543806933249739505}
+  - component: {fileID: 7486649253249147610}
   m_Layer: 0
   m_Name: Arm1
   m_TagString: Untagged
@@ -1069,6 +1094,7 @@ GameObject:
   - component: {fileID: 1507617328344707250}
   - component: {fileID: 802994082173672139}
   - component: {fileID: 7079598759184654341}
+  - component: {fileID: 7079598759184654342}
   m_Layer: 0
   m_Name: Arm2
   m_TagString: Untagged
@@ -1126,6 +1152,7 @@ GameObject:
   - component: {fileID: 6005331574080305187}
   - component: {fileID: 1612261353014456013}
   - component: {fileID: 2235415007179393684}
+  - component: {fileID: 6226703235184382433}
   m_Layer: 0
   m_Name: Arm3
   m_TagString: Untagged
@@ -1133,6 +1160,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &6226703235184382433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6226703235184382432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 894ab4bdf6b846143b66e5e33baacd23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Axis: {x: 1, y: 0, z: 0}
+  StartOffset: {x: 0, y: 0, z: 0}
+  MinAngle: -0.5
+  MaxAngle: 0.5
 --- !u!33 &6417588829770890060
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1185,6 +1228,7 @@ GameObject:
   - component: {fileID: 6583217873935956795}
   - component: {fileID: 6417588829770890060}
   - component: {fileID: 5245759054981343810}
+  - component: {fileID: 7012333201858617550}
   m_Layer: 0
   m_Name: BodyMesh
   m_TagString: Untagged
@@ -1192,6 +1236,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &7012333201858617550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7012333201858617549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 894ab4bdf6b846143b66e5e33baacd23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Axis: {x: 0, y: 0, z: 0}
+  StartOffset: {x: 0, y: 0, z: 0}
+  MinAngle: 0
+  MaxAngle: 0
 --- !u!23 &7079598759184654341
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1237,6 +1297,22 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &7079598759184654342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5847353786671757949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 894ab4bdf6b846143b66e5e33baacd23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Axis: {x: 1, y: 0, z: 0}
+  StartOffset: {x: 0, y: 0, z: 0}
+  MinAngle: -0.5
+  MaxAngle: 0.5
 --- !u!4 &7486649253249147609
 Transform:
   m_ObjectHideFlags: 0
@@ -1252,6 +1328,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4167280742827985704}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7486649253249147610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4995785343625360021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 894ab4bdf6b846143b66e5e33baacd23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Axis: {x: 1, y: 0, z: 0}
+  StartOffset: {x: 0, y: 0, z: 0}
+  MinAngle: -0.5
+  MaxAngle: 0.5
 --- !u!33 &8118001605136624516
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1335,6 +1427,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4167280742827985704}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8909333997106971254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2118872397552048885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 894ab4bdf6b846143b66e5e33baacd23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Axis: {x: 1, y: 0, z: 0}
+  StartOffset: {x: 0, y: 0, z: 0}
+  MinAngle: -1
+  MaxAngle: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

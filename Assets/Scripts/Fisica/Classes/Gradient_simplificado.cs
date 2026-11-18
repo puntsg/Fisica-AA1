@@ -126,6 +126,6 @@ public class Gradient : MonoBehaviour
 
         return newPosition;
     }
-
+    
 
 }
