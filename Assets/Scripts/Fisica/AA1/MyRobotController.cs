@@ -48,6 +48,9 @@ public class MyRobotController : MonoBehaviour
     [SerializeField] bool bodyRotationEnabled = true;
     [SerializeField] bool shovelRotationEnabled = true;
     [SerializeField] bool armRotationEnabled = true;
+
+    Vector3[] initPos;
+    CustomQuaternion[] initRot;
     private void Start()
     {
         //Configuramos las listas
@@ -69,8 +72,26 @@ public class MyRobotController : MonoBehaviour
         //Esto es para que el retón no escape de la pantalla, ni caso
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        initPos = new Vector3[jointsTransform.Count];
+        initRot = new CustomQuaternion[jointsTransform.Count];
+        for(int i = 0; i < jointsTransform.Count; i++)
+        {
+            CustomQuaternion root = ToCustomQuaternion(transform.rotation);
+            initPos[i] = Rotator.QuaternionRot(jointsTransform[i].position - transform.position, root);
+            initRot[i] = CustomQuaternion.Multiply(root, ToCustomQuaternion(jointsTransform[i].rotation));
+        }
     }
 
+    static CustomQuaternion ToCustomQuaternion(Quaternion q)
+    {
+        return new CustomQuaternion(q.w, q.x, q.y, q.z);
+    }
+
+    static Quaternion ToQuaternion(CustomQuaternion q)
+    {
+        return new Quaternion(q.x, q.y, q.z, q.w);
+    }
     void CheckInputs()
     {
         moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
@@ -96,8 +117,8 @@ public class MyRobotController : MonoBehaviour
             MoveArm();
         if (mouseWheelInput != 0 && shovelRotationEnabled)
             MoveShovel();
-        //if(Input.GetKeyDown(KeyCode.R) && (shovelRotationEnabled && armRotationEnabled && bodyRotationEnabled))
-        //    RestoreRotations();
+        if(Input.GetKeyDown(KeyCode.R) && (shovelRotationEnabled && armRotationEnabled && bodyRotationEnabled))
+            RestoreRotations();
     }
     private void Move()
     {
@@ -129,43 +150,83 @@ public class MyRobotController : MonoBehaviour
     }
     void RestoreRotations()
     {
-        armRotationEnabled = false;
-        LeanTween.value(armRotationX,0,2).setOnUpdate(delegate(float r){
-            float delta = r - armRotationX;
-            for (int i = 0; i < armSegments.Count; i++)
-                FK.ApplyFK(jointsTransform, bodyTransform.right, delta, true, i+1);
-            armRotationX = r;
+        bodyRotationEnabled = armRotationEnabled = shovelRotationEnabled = false;
 
-        }).setOnComplete(delegate (){
-            armRotationEnabled=true;
+        Vector3[] startPos = new Vector3[jointsTransform.Count];
+        CustomQuaternion[] startRot = new CustomQuaternion[jointsTransform.Count];
+        CustomQuaternion rootConjugate = ToCustomQuaternion(transform.rotation).GetConjugatedQuaternion();
+        for(int i = 0; i < jointsTransform.Count; i++)
+        {
+            startPos[i] = Rotator.QuaternionRot(jointsTransform[i].position - transform.position, rootConjugate);
+            startRot[i] = CustomQuaternion.Multiply(rootConjugate, ToCustomQuaternion(jointsTransform[i].rotation));
+        }
+
+        LeanTween.value(0f, 1f, 2f).setOnUpdate(delegate (float r)
+        {
+            CustomQuaternion root = ToCustomQuaternion(transform.rotation);
+            for (int i = 0; i < jointsTransform.Count; i++)
+            {
+                Vector3 pos = CustomLerps.Lerp(startPos[i], initPos[i], r);
+                CustomQuaternion rot = CustomLerps.SLERP(startRot[i], initRot[i], r);
+
+                jointsTransform[i].position = transform.position + Rotator.QuaternionRot(pos, root);
+                jointsTransform[i].rotation = ToQuaternion(CustomQuaternion.Multiply(root, rot));
+            }
+
+        }).setOnComplete(delegate ()
+        {
+            bodyRotation = armRotationX = armRotationZ = shovelRotation = 0f;
+            bodyRotationEnabled = armRotationEnabled = shovelRotationEnabled = true;
+
         });
 
-        LeanTween.value(armRotationZ, 0, 2).setOnUpdate(delegate (float r) {
-            float delta = r - armRotationZ ;
-            for (int i = 0; i < armSegments.Count; i++)
-                FK.ApplyFK(jointsTransform, bodyTransform.forward, delta, true, i+1);
-            armRotationZ = r;
-        });
+        //armRotationEnabled = false;
+        //LeanTween.value(armRotationX,0,2).setOnUpdate(delegate(float r){
+        //    float delta = r - armRotationX;
+        //    Vector3 axis = bodyTransform.right;
+        //    for (int i = 0; i < armSegments.Count; i++)
+        //        FK.ApplyFK(jointsTransform, axis, delta, true, i+1);
+        //    armRotationX = r;
 
-        shovelRotationEnabled = false;
-        LeanTween.value(shovelRotation, 0, 2).setOnUpdate(delegate (float r) {
-            float delta = r - shovelRotation;
-            FK.ApplyFK(jointsTransform, jointsTransform[jointsTransform.Count - 1].right, delta, true, jointsTransform.Count - 1);
-            shovelRotation = r;
+        //}).setOnComplete(delegate (){
+        //    armRotationEnabled=true;
+        //});
 
-        }).setOnComplete(delegate () {
-            shovelRotationEnabled = true;
-        });
+        //LeanTween.value(armRotationZ, 0, 2).setOnUpdate(delegate (float r) {
+        //    float delta = r - armRotationZ ;
+        //    Vector3 axis = bodyTransform.forward;
+        //    for (int i = 0; i < armSegments.Count; i++)
+        //        FK.ApplyFK(jointsTransform, axis, delta, true, i+1);
+        //    armRotationZ = r;
+        //});
 
-        bodyRotationEnabled = false;
-        LeanTween.value(bodyRotation, 0, 2).setOnUpdate(delegate (float r) {
-            float delta = r - bodyRotation;
-            FK.ApplyFK(jointsTransform, transform.up, delta, true, 0);
-            bodyRotation = r;
+        //shovelRotationEnabled = false;
+        //LeanTween.value(shovelRotation, 0, 2).setOnUpdate(delegate (float r) {
+        //    float delta = r - shovelRotation;
+        //    FK.ApplyFK(jointsTransform, jointsTransform[jointsTransform.Count - 1].right, delta, true, jointsTransform.Count - 1);
+        //    shovelRotation = r;
 
-        }).setOnComplete(delegate () {
-            bodyRotationEnabled = true;
-        });
+        //}).setOnComplete(delegate () {
+        //    shovelRotationEnabled = true;
+        //});
+
+        //bodyRotationEnabled = false;
+        //LeanTween.value(bodyRotation, 0, 2).setOnUpdate(delegate (float r) {
+        //    float delta = r - bodyRotation;
+        //    FK.ApplyFK(jointsTransform, transform.up, delta, true, 0);
+        //    bodyRotation = r;
+
+        //}).setOnComplete(delegate () {
+
+        //    CustomQuaternion root = ToCustomQuaternion(transform.rotation);
+        //    for(int i = 0; i < jointsTransform.Count; i++)
+        //    {
+        //        jointsTransform[i].position = transform.position + Rotator.QuaternionRot(initPos[i], root);
+        //        jointsTransform[i].rotation = ToQuaternion(CustomQuaternion.Multiply(root, initRot[i]));
+        //    }
+
+        //    bodyRotationEnabled = true;
+        //});
     }
     void MoveArm()
     {
