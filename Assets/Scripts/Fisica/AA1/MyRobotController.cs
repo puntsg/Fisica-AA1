@@ -51,6 +51,7 @@ public class MyRobotController : MonoBehaviour
 
     Vector3[] initPos;
     CustomQuaternion[] initRot;
+    public Rigidbody rb;
     private void Start()
     {
         //Configuramos las listas
@@ -81,6 +82,8 @@ public class MyRobotController : MonoBehaviour
             initPos[i] = Rotator.QuaternionRot(jointsTransform[i].position - transform.position, root);
             initRot[i] = CustomQuaternion.Multiply(root, ToCustomQuaternion(jointsTransform[i].rotation));
         }
+
+        rb = GetComponent<Rigidbody>();
     }
 
     static CustomQuaternion ToCustomQuaternion(Quaternion q)
@@ -99,9 +102,14 @@ public class MyRobotController : MonoBehaviour
         mouseWheelInput = Input.mouseScrollDelta.y;
         mousePressed = Input.GetMouseButton(0);
     }
+
     private void Update()
     {
         CheckInputs();
+    }
+
+    private void FixedUpdate()
+    {
         Move();
         //Rodrigo, en un inicio nos estabamos ayudando de esta web https://www.alanzucconi.com/2017/04/06/forward-kinematics/ , pero no cuadraba con lo del FK
         //P = punto
@@ -124,29 +132,30 @@ public class MyRobotController : MonoBehaviour
     {
         //Movimiento to' suave
         if(moveInput.y != 0)
-            currentSpeed += -moveInput.y * acceleration * Time.deltaTime;
+            currentSpeed += -moveInput.y * acceleration * Time.fixedDeltaTime;
         else
         {
             if (currentSpeed > 0)
-                currentSpeed = Mathf.Clamp(currentSpeed - (acceleration*2) * Time.deltaTime, 0, maxSpeed);
+                currentSpeed = Mathf.Clamp(currentSpeed - (acceleration*2) * Time.fixedDeltaTime, 0, maxSpeed);
             else if(currentSpeed < 0)
-                currentSpeed = Mathf.Clamp(currentSpeed + (acceleration * 2) * Time.deltaTime, -maxSpeed, 0);
+                currentSpeed = Mathf.Clamp(currentSpeed + (acceleration * 2) * Time.fixedDeltaTime, -maxSpeed, 0);
         }
         currentSpeed = Mathf.Clamp(currentSpeed, -maxSpeed, maxSpeed);
-        transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime);
-
+        //transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime);
+        rb.MovePosition(rb.position + rb.rotation * Vector3.forward * currentSpeed * Time.fixedDeltaTime);
         //Rotación to' suave chaval
         if (moveInput.x != 0)
-            currentTurnSpeed += moveInput.x * turnAcceleration * Time.deltaTime;
+            currentTurnSpeed += moveInput.x * turnAcceleration * Time.fixedDeltaTime;
         else
         {
             if (currentTurnSpeed > 0)
-                currentTurnSpeed = Mathf.Clamp(currentTurnSpeed - (turnAcceleration * 4) * Time.deltaTime, 0, maxTurnSpeed);
+                currentTurnSpeed = Mathf.Clamp(currentTurnSpeed - (turnAcceleration * 4) * Time.fixedDeltaTime, 0, maxTurnSpeed);
             else if (currentTurnSpeed < 0)
-                currentTurnSpeed = Mathf.Clamp(currentTurnSpeed + (turnAcceleration * 4) * Time.deltaTime, -maxTurnSpeed, 0);
+                currentTurnSpeed = Mathf.Clamp(currentTurnSpeed + (turnAcceleration * 4) * Time.fixedDeltaTime, -maxTurnSpeed, 0);
         }
         currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -maxTurnSpeed, maxTurnSpeed);
-        transform.Rotate(Vector3.up * currentTurnSpeed * Time.deltaTime);
+        //transform.Rotate(Vector3.up * currentTurnSpeed * Time.deltaTime);
+        rb.MoveRotation(rb.rotation * Quaternion.Euler(0, currentTurnSpeed * Time.fixedDeltaTime, 0));
     }
     void RestoreRotations()
     {
